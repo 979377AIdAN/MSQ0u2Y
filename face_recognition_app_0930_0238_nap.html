@@ -1,0 +1,75 @@
+// 代码生成时间: 2025-09-30 02:38:26
+        // Define a Svelte component for the face recognition app
+        svelte.create('FaceRecognitionApp', {
+            oninit() {
+                // Initialize the state
+                this.image = '';
+                this.detectedFaces = [];
+                this.error = null;
+            },
+            // Function to handle image input changes
+            handleImageChange(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                if (!file.type.startsWith('image/')) {
+                    this.error = 'Please upload an image file.';
+                    return;
+                }
+                // Create an image element and set its src to the file
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.image = e.target.result;
+                    this.detectFaces();
+                };
+                reader.readAsDataURL(file);
+            },
+            // Function to detect faces in the image
+            detectFaces() {
+                if (!this.image) return;
+                // Use a face recognition API or library to detect faces
+                // For demonstration purposes, we'll simulate an API call
+                fetch('https://face-recognition-api.com/detect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ image: this.image }),
+                }).then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to detect faces');
+                    }
+                    return response.json();
+                }).then(data => {
+                    this.detectedFaces = data.faces;
+                }).catch(error => {
+                    this.error = error.message;
+                });
+            },
+            // Render the component
+            view() {
+                return (
+                    <div>
+                        <h1>Face Recognition App</h1>
+                        <input type="file" on:change={this.handleImageChange} />
+                        {#if this.image}
+                            <img src={this.image} alt="Uploaded Image" />
+                        {/if}
+                        {#if this.detectedFaces.length > 0}
+                            <ul>
+                                {#each this.detectedFaces as face}
+                                    <li>
+                                        <span>Face detected at position {face.x}, {face.y}</span>
+                                    </li>
+                                {/each}
+                            </ul>
+                        {/if}
+                        {#if this.error}
+                            <p style="color: red;">{this.error}</p>
+                        {/if}
+                    </div>
+                );
+            }
+        });
+    </script>
+</body>
+</html>
