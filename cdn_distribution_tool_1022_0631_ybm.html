@@ -1,0 +1,56 @@
+// 代码生成时间: 2025-10-22 06:31:40
+// CDN Distribution Tool using Svelte framework
+
+// This Svelte component serves as a simple CDN content distribution tool.
+// It allows users to enter a URL and fetches the content from the provided CDN URL.
+
+<svelte:window on:load="fetchCDNContent()">
+</svelte:window>
+
+<script>
+  import { onMount, writable } from 'svelte/store';
+  import { error } from 'svelte-spa-router';
+  
+  // State stores for URL and fetched content
+  const url = writable('');
+  const content = writable('');
+  const errorState = writable(null);
+  
+  // Function to fetch content from the CDN URL
+  async function fetchCDNContent() {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const fetchedContent = await response.text();
+      content.set(fetchedContent);
+    } catch (err) {
+      errorState.set(err.message);
+    }
+  }
+  
+  // Event handler for form submission
+  function handleSubmit(event) {
+    event.preventDefault();
+    fetchCDNContent();
+  }
+</script>
+
+<main>
+  <h1>CDN Content Distribution Tool</h1>
+  <form on:submit|preventDefault="handleSubmit">
+    <label for="url">Enter CDN URL:</label>
+    <input type="text" bind:value="url" placeholder="https://example.com/cdn/content"/>
+    <button type="submit">Fetch Content</button>
+  </form>
+  
+  {#if $errorState}
+    <p>Error: {$errorState}</p>
+  {:else}
+    <div>{#if $content}
+      <h2>Fetched Content:</h2>
+      <pre>{$content}</pre>
+    {/if}</div>
+  {/if}
+</main>
